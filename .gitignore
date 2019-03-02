@@ -1,0 +1,4 @@
+*.o
+*.so
+results
+tmp_install

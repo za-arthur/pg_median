@@ -1,0 +1,118 @@
+CREATE TABLE intvals(val int, color text);
+-- Test empty table
+SELECT median(val) FROM intvals;
+ median 
+--------
+       
+(1 row)
+
+-- Integers with odd number of values
+INSERT INTO intvals VALUES
+       (1, 'a'),
+       (2, 'c'),
+       (9, 'b'),
+       (7, 'c'),
+       (2, 'd'),
+       (-3, 'd'),
+       (2, 'e');
+SELECT * FROM intvals ORDER BY val;
+ val | color 
+-----+-------
+  -3 | d
+   1 | a
+   2 | c
+   2 | e
+   2 | d
+   7 | c
+   9 | b
+(7 rows)
+
+SELECT median(val) FROM intvals;
+ median 
+--------
+      2
+(1 row)
+
+-- Integers with NULLs and even number of values
+INSERT INTO intvals VALUES
+       (99, 'a'),
+       (NULL, 'a'),
+       (NULL, 'e'),
+       (NULL, 'b'),
+       (7, 'c'),
+       (0, 'd');
+SELECT * FROM intvals ORDER BY val;
+ val | color 
+-----+-------
+  -3 | d
+   0 | d
+   1 | a
+   2 | e
+   2 | d
+   2 | c
+   7 | c
+   7 | c
+   9 | b
+  99 | a
+     | a
+     | e
+     | b
+(13 rows)
+
+SELECT median(val) FROM intvals;
+ median 
+--------
+      2
+(1 row)
+
+-- Integers GROUP BY color
+SELECT color, median(val) FROM intvals GROUP BY color;
+ color | median 
+-------+--------
+ c     |      7
+ b     |      9
+ a     |     50
+ e     |      2
+ d     |      0
+(5 rows)
+
+-- Text values
+CREATE TABLE textvals(val text, color int);
+INSERT INTO textvals VALUES
+       ('erik', 1),
+       ('mat', 3),
+       ('rob', 8),
+       ('david', 9),
+       ('lee', 2);
+SELECT * FROM textvals ORDER BY val;
+  val  | color 
+-------+-------
+ david |     9
+ erik  |     1
+ lee   |     2
+ mat   |     3
+ rob   |     8
+(5 rows)
+
+SELECT median(val) FROM textvals;
+ median 
+--------
+ lee
+(1 row)
+
+-- Text with even number of values
+INSERT INTO textvals VALUES
+       ('extra', 5);
+SELECT median(val) FROM textvals; -- fails
+ERROR:  could not identify a plus operator for type text
+-- Test large table with timestamps
+CREATE TABLE timestampvals (val timestamptz);
+INSERT INTO timestampvals(val)
+SELECT TIMESTAMP 'epoch' + (i * INTERVAL '1 second')
+FROM generate_series(0, 100000) as T(i);
+SELECT median(val) FROM timestampvals;
+            median            
+------------------------------
+ Thu Jan 01 13:53:20 1970 PST
+(1 row)
+

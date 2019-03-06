@@ -66,15 +66,34 @@ SELECT median(val) FROM intvals;
 (1 row)
 
 -- Integers GROUP BY color
-SELECT color, median(val) FROM intvals GROUP BY color;
+SELECT color, median(val) FROM intvals GROUP BY color ORDER BY color;
  color | median 
 -------+--------
- c     |      7
- b     |      9
  a     |     50
- e     |      2
+ b     |      9
+ c     |      7
  d     |      0
+ e     |      2
 (5 rows)
+
+-- Window function with integers
+SELECT color, val, median(val) OVER (PARTITION BY color) FROM intvals ORDER BY color, val;
+ color | val | median 
+-------+-----+--------
+ a     |   1 |     50
+ a     |  99 |     50
+ a     |     |     50
+ b     |   9 |      9
+ b     |     |      9
+ c     |   2 |      7
+ c     |   7 |      7
+ c     |   7 |      7
+ d     |  -3 |      0
+ d     |   0 |      0
+ d     |   2 |      0
+ e     |   2 |      2
+ e     |     |      2
+(13 rows)
 
 -- Text values
 CREATE TABLE textvals(val text, color int);
@@ -110,6 +129,26 @@ CREATE TABLE timestampvals (val timestamptz);
 INSERT INTO timestampvals(val)
 SELECT TIMESTAMP 'epoch' + (i * INTERVAL '1 second')
 FROM generate_series(0, 100000) as T(i);
+SELECT median(val) FROM timestampvals;
+            median            
+------------------------------
+ Thu Jan 01 13:53:20 1970 PST
+(1 row)
+
+-- Force use of parallelism
+ALTER TABLE timestampvals set (parallel_workers = 4);
+SET parallel_setup_cost = 0;
+SET max_parallel_workers_per_gather = 4;
+EXPLAIN (COSTS OFF) SELECT median(val) FROM timestampvals;
+                      QUERY PLAN                      
+------------------------------------------------------
+ Finalize Aggregate
+   ->  Gather
+         Workers Planned: 4
+         ->  Partial Aggregate
+               ->  Parallel Seq Scan on timestampvals
+(5 rows)
+
 SELECT median(val) FROM timestampvals;
             median            
 ------------------------------

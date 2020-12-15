@@ -10,7 +10,7 @@ SELECT median(val) FROM intvals;
 INSERT INTO intvals VALUES
        (1, 'b'),
        (2, 'b'),
-       (9, 'b'),
+       (9, 'c'),
        (7, 'c'),
        (2, 'd'),
        (-3, 'd'),

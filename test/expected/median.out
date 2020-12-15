@@ -8,8 +8,8 @@ SELECT median(val) FROM intvals;
 
 -- Integers with odd number of values
 INSERT INTO intvals VALUES
-       (1, 'b'),
-       (2, 'b'),
+       (1, 'a'),
+       (2, 'c'),
        (9, 'b'),
        (7, 'c'),
        (2, 'd'),

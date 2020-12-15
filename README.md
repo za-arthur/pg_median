@@ -1,5 +1,7 @@
 # Median aggregate
 
+![CI](https://github.com/za-arthur/pg_median/workflows/CI/badge.svg)
+
 The module provides an aggregate function that calculates the *median* over an
 input set (typically values from a table).
 
